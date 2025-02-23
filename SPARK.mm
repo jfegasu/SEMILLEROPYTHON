@@ -21,5 +21,13 @@
 <edge STYLE="sharp_bezier" WIDTH="8"/>
 <font NAME="SansSerif" SIZE="18"/>
 </node>
+<node COLOR="#0033ff" CREATED="1740274386600" ID="ID_1800683200" MODIFIED="1740274402389" POSITION="right" TEXT="show">
+<edge STYLE="sharp_bezier" WIDTH="8"/>
+<font NAME="SansSerif" SIZE="18"/>
+</node>
+<node COLOR="#0033ff" CREATED="1740274403222" ID="ID_378321334" MODIFIED="1740274418291" POSITION="right" TEXT="printSchema">
+<edge STYLE="sharp_bezier" WIDTH="8"/>
+<font NAME="SansSerif" SIZE="18"/>
+</node>
 </node>
 </map>
