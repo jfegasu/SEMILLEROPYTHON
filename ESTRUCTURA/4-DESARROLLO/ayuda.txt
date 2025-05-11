@@ -1,0 +1,202 @@
+Si deseas trabajar con **SQLite** en lugar de **Oracle** en un proyecto Flask + Peewee, la configuración es mucho más sencilla. Aquí te explico cómo configurar el **endpoint Flask** para interactuar con una base de datos SQLite usando **Peewee**.
+
+### 1. **Configura `config.py` para SQLite:**
+
+SQLite es más fácil de configurar que otros motores de base de datos. Usaremos un archivo SQLite llamado `app.db` en la raíz del proyecto.
+
+```python
+import os
+
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'clave_secreta')
+
+    # Configuración para SQLite
+    DATABASE = {
+        'engine': 'peewee.SqliteDatabase',
+        'name': os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app.db'),
+    }
+```
+
+### 2. **Modelo `User` en `models.py`:**
+
+Definimos el modelo `User`, que tendrá campos para el nombre de usuario y el correo electrónico.
+
+```python
+from app import db_wrapper
+
+class BaseModel(db_wrapper.Model):
+    class Meta:
+        database = db_wrapper.database
+
+class User(BaseModel):
+    username = db_wrapper.CharField(unique=True)
+    email = db_wrapper.CharField(unique=True)
+```
+
+### 3. **Rutas y Endpoints en `routes.py`:**
+
+Ahora vamos a crear los endpoints que permitirán interactuar con los datos de la base de datos SQLite.
+
+#### **Ruta para agregar un usuario (POST)**
+
+```python
+from flask import Blueprint, request, jsonify
+from app.models import User
+
+main_bp = Blueprint('main', __name__)
+
+# Endpoint para crear un nuevo usuario
+@main_bp.route('/add_user', methods=['POST'])
+def add_user():
+    data = request.get_json()
+    try:
+        # Crear un nuevo usuario con los datos recibidos
+        new_user = User.create(
+            username=data['username'],
+            email=data['email']
+        )
+        return jsonify({
+            'message': 'Usuario creado exitosamente',
+            'user_id': new_user.id,
+            'username': new_user.username
+        }), 201
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 400
+```
+
+#### **Ruta para obtener todos los usuarios (GET)**
+
+```python
+# Endpoint para obtener todos los usuarios
+@main_bp.route('/users', methods=['GET'])
+def get_users():
+    try:
+        users = User.select()  # Selecciona todos los usuarios
+        user_list = [{'id': user.id, 'username': user.username, 'email': user.email} for user in users]
+        return jsonify(user_list), 200
+    except Exception as e:
+        return jsonify({
+            'error': str(e)
+        }), 400
+```
+
+### 4. **Configurar la aplicación en `__init__.py`:**
+
+Este archivo crea la aplicación Flask, conecta a la base de datos y registra los **blueprints** (en este caso, las rutas de los endpoints).
+
+```python
+from flask import Flask
+from playhouse.flask_utils import FlaskDB
+
+db_wrapper = FlaskDB()
+
+def create_app(config_class='config.Config'):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+
+    # Iniciar Peewee con la base de datos SQLite
+    db_wrapper.init_app(app)
+
+    # Registrar las rutas de la aplicación
+    from app.routes import main_bp
+    app.register_blueprint(main_bp)
+
+    return app
+```
+
+### 5. **Crear y ejecutar la base de datos en `run.py`:**
+
+El archivo `run.py` es el punto de entrada para ejecutar tu aplicación. Aquí también nos aseguramos de que las tablas se creen si no existen.
+
+```python
+from app import create_app
+from app.models import User, db_wrapper
+
+app = create_app()
+
+# Crear las tablas si no existen
+with app.app_context():
+    db = db_wrapper.database
+    db.create_tables([User], safe=True)  # Crea la tabla User si no existe
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+### 6. **Realizar peticiones a los endpoints:**
+
+#### 6.1 **Agregar un usuario (POST `/add_user`)**
+
+Para agregar un usuario, podemos hacer una solicitud POST a `/add_user` enviando los datos en formato JSON:
+
+##### Usando **cURL**:
+
+```bash
+curl -X POST http://127.0.0.1:5000/add_user -H "Content-Type: application/json" -d '{"username": "johndoe", "email": "johndoe@example.com"}'
+```
+
+##### Respuesta esperada:
+
+```json
+{
+    "message": "Usuario creado exitosamente",
+    "user_id": 1,
+    "username": "johndoe"
+}
+```
+
+#### 6.2 **Obtener todos los usuarios (GET `/users`)**
+
+Para obtener la lista de usuarios, hacemos una solicitud GET a `/users`:
+
+##### Usando **cURL**:
+
+```bash
+curl http://127.0.0.1:5000/users
+```
+
+##### Respuesta esperada:
+
+```json
+[
+    {
+        "id": 1,
+        "username": "johndoe",
+        "email": "johndoe@example.com"
+    }
+]
+```
+
+---
+
+### 7. **Estructura final de carpetas:**
+
+Tu proyecto tendrá una estructura de carpetas como la siguiente:
+
+```
+/tu-proyecto
+    /app
+        __init__.py
+        /models.py
+        /routes.py
+    config.py
+    run.py
+```
+
+### 8. **Ejecutar la aplicación:**
+
+Para ejecutar la aplicación, simplemente usa:
+
+```bash
+python run.py
+```
+
+Tu aplicación Flask debería estar corriendo en `http://127.0.0.1:5000`.
+
+### 9. **Conclusión:**
+
+Ahora tienes una aplicación Flask con una base de datos **SQLite** y Peewee. Los endpoints `/add_user` y `/users` te permiten agregar y obtener usuarios, respectivamente.
+
+Si tienes alguna pregunta o deseas agregar más funcionalidades, ¡no dudes en preguntar!
