@@ -10,7 +10,45 @@ class Config:
         'name': os.path.join(BASE_DIR, 'app.db'),
         'engine': 'peewee.SqliteDatabase',
     }
+    #  Configuración de la base de datos MySQL para Peewee
+    # pip install pymysql
+    MYSQL = {
+        'engine': 'peewee.MySQLDatabase',
+        'name': 'nombre_base',
+        'user': 'usuario',
+        'password': 'contraseña',
+        'host': 'localhost',
+        'port': 3306,
+        'charset': 'utf8mb4'
+    }
+    # pip install psycopg2-binary
+
+    POSTGRES = {
+        'engine': 'peewee.PostgresqlDatabase',
+        'name': 'nombre_de_la_base',
+        'user': 'usuario',
+        'password': 'contraseña',
+        'host': 'localhost',
+        'port': 5432
+    }
+    # pip install pyodbc
+    SQLSERVER = {
+        'engine': 'playhouse.mssql_ext.MSSQLDatabase',
+        'name': 'NombreDeBase',
+        'user': 'tu_usuario',
+        'password': 'tu_contraseña',
+        'host': 'localhost',
+        'port': 1433,
+        'driver': 'ODBC Driver 17 for SQL Server',
+        'options': {
+            'timeout': 10
+        }
+    }
+
     DATABASE=SQLITE
+
+
+    
 
 
 
