@@ -33,6 +33,7 @@ class Config:
     }
     # pip install pyodbc
     # Peewee no tiene un conector oficial específico para SQL Server, pero puedes usar playhouse.mssql_ext (extensiones no oficiales) o el conector genérico con ODBC.
+    # 'dsn': 'Driver={ODBC Driver 17 for SQL Server};Server=localhost;Database=NombreDeBase;UID=usuario;PWD=contraseña;'
 
     SQLSERVER = {
         'engine': 'playhouse.mssql_ext.MSSQLDatabase',
@@ -46,8 +47,39 @@ class Config:
             'timeout': 10
         }
     }
+    # pip install pyodbc
+
+    ORACLE = {
+        'engine': 'peewee.Database',  # Se sobrescribirá con una instancia directa
+        'dsn': 'Driver={Oracle in instantclient_19_8};DBQ=localhost:1521/XEPDB1;UID=usuario;PWD=contraseña;'
+    }
 
     DATABASE=SQLITE
+# __init__.py con conexión manual
+# from flask import Flask
+# import pyodbc
+# from peewee import Database
+# from playhouse.flask_utils import FlaskDB
+# from peewee import Model
+
+# db_wrapper = FlaskDB()
+
+# def create_app(config_class='config.Config'):
+#     app = Flask(__name__)
+#     app.config.from_object(config_class)
+
+#     # Crear conexión manual
+#     dsn = app.config['DATABASE']['dsn']
+#     conn = pyodbc.connect(dsn)
+#     database = Database(conn)
+
+#     db_wrapper.init_app(app, database_override=database)
+
+#     from app.routes import main_bp
+#     app.register_blueprint(main_bp)
+
+#     return app
+
 
 
     
