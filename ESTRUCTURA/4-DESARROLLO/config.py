@@ -32,6 +32,8 @@ class Config:
         'port': 5432
     }
     # pip install pyodbc
+    # Peewee no tiene un conector oficial específico para SQL Server, pero puedes usar playhouse.mssql_ext (extensiones no oficiales) o el conector genérico con ODBC.
+
     SQLSERVER = {
         'engine': 'playhouse.mssql_ext.MSSQLDatabase',
         'name': 'NombreDeBase',
